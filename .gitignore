@@ -106,3 +106,6 @@ dist
 
 **/node_modules/
 misc/
+
+.idea
+package-lock.json

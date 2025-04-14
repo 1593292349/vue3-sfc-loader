@@ -8,7 +8,7 @@ const app = express();
 app.use(express.static(path.resolve(__dirname, '../dist')));
 app.use(express.static(__dirname, { 'index': [index] } ));
 
-const port = process.env.PORT ? process.env.PORT.trim() : 8080;
+const port = process.env.PORT ? process.env.PORT.trim() : 8099;
 app.listen(port)
 
 console.log(`http://localhost:${ port }/`);

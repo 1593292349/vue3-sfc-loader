@@ -10,7 +10,7 @@
     const config = {
       files: {
         '/app.vue':
-        '  <template>                                                           '+ 
+        '  <template>                                                           '+
         '    <div>{{ index }}</div>                                             '+
         '  </template>                                                          '+
         '  <script>                                                             '+
@@ -24,14 +24,14 @@
         '      async mounted() {                                                '+
         '                                                                       '+
         '        for ( ; this.index < 100; ++this.index )                       '+
-        '          await new Promise(resolve => setTimeout(resolve, 1000));     '+
+        '          await new Promise(resolve => setTimeout(resolve, 500));     '+
         '      }                                                                '+
         '    }                                                                  '+
         '  </script>                                                            '+
         '',
       }
     };
-    
+
     const options = {
       moduleCache: { vue: Vue },
       getFile: function(url) { return config.files[url] },
@@ -42,7 +42,7 @@
     .then(function(app) {
       new Vue(app).$mount('#app')
     });
-    
+
   </script>
 </body>
 </html>
