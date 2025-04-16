@@ -17,7 +17,7 @@ async function configFactory({ name, vueTarget, libraryTargetModule }) {
     let vueVersion; // expected vue version
     switch ( vueTarget ) {
         case '2':
-            vueVersion = (await import('vue-template-compiler/package.json', { assert: { type: 'json' } })).default.version;
+            vueVersion = (await import('@vue/compiler-sfc-vue2/package.json', { assert: { type: 'json' } })).default.version;
             break;
         case '3':
             vueVersion = (await import('@vue/compiler-sfc/package.json', { assert: { type: 'json' } })).default.version;
@@ -25,7 +25,7 @@ async function configFactory({ name, vueTarget, libraryTargetModule }) {
         default:
             throw new Error(`invalid vueTarget: ${ vueTarget }`)
     }
-    
+
     /**
      * @type {import('rollup').RollupOptions}
      */

@@ -83,7 +83,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 
 			return [k, JSON.parse(v)];
 		} catch {
-			
+
 			return [k, v];
 		}
 	}));
@@ -95,7 +95,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 	let vueVersion; // expected vue version
 	switch ( vueTarget ) {
 		case '2':
-			vueVersion = require('vue-template-compiler/package.json').version;
+			vueVersion = require('@vue/compiler-sfc-vue2/package.json').version;
 			break;
 		case '3':
 			vueVersion = require('@vue/compiler-sfc/package.json').version;
@@ -108,7 +108,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 	// "and" -> intersection
 	// "not" -> relative complement
 
-	// excludes cases that make no sense 
+	// excludes cases that make no sense
 	actualTargetsBrowsers += ( libraryTargetModule ? ' and supports es6-module' : '' ) + ( vueTarget == 3 ? ' and supports proxy' : '' );
 
 	console.log('config', { actualTargetsBrowsers, noPresetEnv, noCompress, noSourceMap, genSourcemap, libraryTargetModule, vueTarget });
@@ -121,7 +121,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 	const excludeBabelPlugins = [
 		'@babel/plugin-transform-unicode-sets-regex', // exclude because it indirectly imports regenerate-unicode-properties (about 500KB)
 	]
-	
+
 	pluginNameList = pluginNameList.filter(e => !excludeBabelPlugins.includes(e) );
 	console.log('requiredBabelPluginsNamesByBrowserTarget', pluginNameList);
 
@@ -179,7 +179,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 
 		plugins: [
 			...!libraryTargetModule ? [
-/*				
+/*
 				new DtsBundlePlugin({
 					name: `vue${ vueTarget }-sfc-loader`,
 					main:`${distTypesPath}/src/index.d.ts`,
@@ -200,7 +200,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 
 				'process.env.VUE_ENV': JSON.stringify('client'),
 				'global.process.env.VUE_ENV': JSON.stringify('client'),
-				
+
 				// further optimizations (ease dead code elimination)
 				'process.stdin': 'null',
 				'process.stdout': 'null',
@@ -236,7 +236,7 @@ const configure = ({name, vueTarget, libraryTargetModule}) => async (env = {}, {
 								arrows: caniuse.isSupported('arrow-functions', actualTargetsBrowsers),
 								ecma: caniuse.isSupported('es6', actualTargetsBrowsers) ? '2015' : '5', // note ECMAScript 2015 is the sixth edition of the ECMAScript Language Specification standard
 							} : {},
-							
+
 							// beware, unsafe: true is not suitable for this project !
 							// unsafe: true,
 							// unsafe_comps: true,
@@ -333,6 +333,7 @@ ${ pkg.name } v${ pkg.version } for vue${ vueTarget }
 
 				'@vue/shared$': require.resolve('@vue/shared'),
 				'@vue/compiler-sfc$': require.resolve('@vue/compiler-sfc'),
+				'@vue/compiler-sfc-vue2$': require.resolve('@vue/compiler-sfc-vue2'),
 				'@vue/compiler-dom$': require.resolve('@vue/compiler-dom'),
 
 				'@babel/plugin-transform-typescript$': require.resolve('@babel/plugin-transform-typescript'),
@@ -353,7 +354,7 @@ ${ pkg.name } v${ pkg.version } for vue${ vueTarget }
 				'postcss-modules-scope': false,
 
 				'semver': false,
-				
+
 				// vue2
 				'sass': false,
 				'stylus': false,
