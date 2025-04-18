@@ -1,5 +1,10 @@
 const { defaultFilesFactory, createPage } = require('./testsTools.js');
 
+beforeEach(() => {
+	jest.spyOn(console, 'log').mockImplementation(() => {});
+	jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
 [
 	{ desc: "vue 2", vueTarget: 2 },
 	{ desc: "vue 3", vueTarget: 3 },
@@ -1062,44 +1067,41 @@ const { defaultFilesFactory, createPage } = require('./testsTools.js');
 		});
 
 
-		if ( vueTarget === 3 ) { // Vue 2 does not handle cssVars
+		test('should handle cssVars', async () => {
 
-			test('should handle cssVars', async () => {
+			const { page, output } = await createPage({
+				files: {
+					...files,
 
-				const { page, output } = await createPage({
-					files: {
-						...files,
+					'/main.vue': `
 
-						'/main.vue': `
+						<template>
+						  <div>Hello <span class="example">{{ msg }}</span></div>
+						</template>
+						<script>
+						  export default {
+						    data () {
+						      return {
+						        msg: 'World !',
+						        color: 'blue',
+						      }
+						    }
+						  }
+						</script>
+						<style scoped>
+						  .example {
+						    color: v-bind('color')
+						  }
+						</style>
 
-							<template>
-							  Hello <span class="example">{{ msg }}</span>
-							</template>
-							<script>
-							  export default {
-							    data () {
-							      return {
-							        msg: 'World !',
-							        color: 'blue',
-							      }
-							    }
-							  }
-							</script>
-							<style scoped>
-							  .example {
-							    color: v-bind('color')
-							  }
-							</style>
-
-						`
-					}
-				});
-
-				await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('Hello World !');
-				await expect(page.$eval('#app .example', el => getComputedStyle(el).color)).resolves.toBe('rgb(0, 0, 255)');
-
+					`
+				}
 			});
-		}
+
+			await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('Hello World !');
+			await expect(page.$eval('#app .example', el => getComputedStyle(el).color)).resolves.toBe('rgb(0, 0, 255)');
+
+		});
 
 
 		test('should have correct vue version', async () => {
@@ -1115,55 +1117,49 @@ const { defaultFilesFactory, createPage } = require('./testsTools.js');
 			await expect(versions[0]).toBe(versions[1]);
 		});
 
-		if ( vueTarget === 3 ) { // Vue 2 does not have <script setup>
-		
-			test('should properly handle components import in <script setup>', async () => {
+		test('should properly handle components import in <script setup>', async () => {
 
-				const { page, output } = await createPage({
-					files: {
-						...files,
-						'/main.vue': `
-							<template>a<comp/>e</template>
-							<script setup>
-								import comp from "./comp.vue";
-							</script>
-						`,
-						'/comp.vue': `
-							<template>b{{ foo }}d</template>
-							<script setup>
-								const foo = 'c'
-							</script>
-						`,
-					}
-				});
-
-				await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('abcde');
+			const { page, output } = await createPage({
+				files: {
+					...files,
+					'/main.vue': `
+						<template><div>a<comp/>e</div></template>
+						<script setup>
+							import comp from "./comp.vue";
+						</script>
+					`,
+					'/comp.vue': `
+						<template><div>b{{ foo }}d</div></template>
+						<script setup>
+							const foo = 'c'
+						</script>
+					`,
+				}
 			});
-		}
+
+			await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('abcde');
+		});
 
 
-		if ( vueTarget === 3 ) { // Vue 2 does not have <script setup>
-		
-			test('should properly handle <script> + <script setup>', async () => {
+		test('should properly handle <script> + <script setup>', async () => {
 
-				const { page, output } = await createPage({
-					files: {
-						...files,
-						'/main.vue': `
-							<script setup>
-				                const a = 123;
-							</script>
-              				<script>
-                				const b = 456;
-							</script>
-              				<template>{{a}} {{b}}</template>
-						`,
-					}
-				});
-
-				await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('123 456');
+			const { page, output } = await createPage({
+				files: {
+					...files,
+					'/main.vue': `
+						<script setup>
+			                const a = 123;
+						</script>
+                        <script>
+                            const b = 456;
+						</script>
+                        <template><div>{{a}} {{b}}</div></template>
+					`,
+				}
 			});
-		}
+
+			await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('123 456');
+		});
 
 
 
@@ -1199,8 +1195,6 @@ const { defaultFilesFactory, createPage } = require('./testsTools.js');
 		});
 
 
-		if ( vueTarget === 3 ) { // 
-
 			test('fix bindingMetadata missing in cache data', async () => {
 
 				const { page, output } = await createPage({
@@ -1216,13 +1210,13 @@ const { defaultFilesFactory, createPage } = require('./testsTools.js');
 
 	;(async () => {
 
-		const { loadModule } = window['vue3-sfc-loader'];
+		const { loadModule } = window['vue${vueTarget}-sfc-loader'];
 
 		/* <!-- */
 		const config = {
 			files: {
-				'/comp.vue': '<template>comp_1</template>',
-				'/main.vue': '<script setup> import comp from "./comp.vue" </script><template>main_comp <comp/></template>',
+				'/comp.vue': '<template><div>comp_1</div></template>',
+				'/main.vue': '<script setup> import comp from "./comp.vue" </script><template><div>main_comp <comp/></div></template>',
 			}
 		};
 		/* --> */
@@ -1256,9 +1250,12 @@ const { defaultFilesFactory, createPage } = require('./testsTools.js');
 		// delete only main.vue script cache item
 		delete cache[mainKey];
 		
-		const app = Vue.createApp(await loadModule('/main.vue', { moduleCache, compiledCache, ...options }));
+		const app = ${vueTarget === 3?'Vue.createApp':'new Vue'}(await loadModule('/main.vue', { moduleCache, compiledCache, ...options }));
 
-		app.mount('#app');
+		let appElt = document.getElementById('app');
+		${vueTarget === 2?`appElt = appElt.appendChild(document.createElement('div'))`:''}
+
+		app.${vueTarget === 3?'mount':'$mount'}(appElt);
 
 	})().catch(ex => console.error(ex));
 
@@ -1269,34 +1266,31 @@ const { defaultFilesFactory, createPage } = require('./testsTools.js');
 
 				await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('main_comp comp_1');
 			});
-		}
 
 
-		if ( vueTarget === 3 ) { // no point in testing it for vue2
-			test('should properly handle search string in path', async () => {
+		test('should properly handle search string in path', async () => {
 
-				const { page, output } = await createPage({
-					files: {
-						...files,
-						'/components/comp1.vue': `
-							<template>1</template>
-						`,
-						'/components/comp2.vue': `
-							<template>2</template>
-						`,
-						'/main.vue': `
-							<script setup>
-							import comp1 from './components/comp1.vue?a=1.txt'
-							import comp2 from './components/comp2.vue?a=/2'
-							</script>
-							<template><comp1/><comp2/></template>
-						`,
-					}
-				});
-
-				await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('12');
+			const { page, output } = await createPage({
+				files: {
+					...files,
+					'/components/comp1.vue': `
+						<template><div>1</div></template>
+					`,
+					'/components/comp2.vue': `
+						<template><div>2</div></template>
+					`,
+					'/main.vue': `
+						<script setup>
+						import comp1 from './components/comp1.vue?a=1.txt'
+						import comp2 from './components/comp2.vue?a=/2'
+						</script>
+						<template><div><comp1/><comp2/></div></template>
+					`,
+				}
 			});
-		}
+
+			await expect(page.$eval('#app', el => el.textContent.trim())).resolves.toBe('12');
+		});
 
 
 
