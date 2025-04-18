@@ -1,6 +1,6 @@
 {
 	"name":"vue3-sfc-loader",
-	"version":"0.9.100",
+	"version":"0.9.101",
 	"description":"Single File Component loader",
 	"keywords":[
 		"vue",
