@@ -46,11 +46,11 @@
 				"require":"./dist/vue2-sfc-loader-node.js"
 			},
 			"import":{
-				"types":"./dist/types/vue2-esm/src/index.d.ts",
+				"types":"./dist/types/vue2-esm/index.d.ts",
 				"default":"./dist/vue2-sfc-loader.esm.js"
 			},
 			"require":{
-				"types":"./dist/types/vue2/src/index.d.ts",
+				"types":"./dist/types/vue2/index.d.ts",
 				"default":"./dist/vue2-sfc-loader.js"
 			}
 		},

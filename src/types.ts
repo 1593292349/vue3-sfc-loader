@@ -29,7 +29,7 @@ export type ModuleCacheId = string;
 /**
  * An abstract way to specify a path. It could be a simple string or a object like an URL. An AbstractPath must always be convertible to a string.
  */
-export type AbstractPath = {
+export type AbstractPath = string & {
 	toString() : string,
 }
 
@@ -65,7 +65,7 @@ export type PathResolve = (pathCx : PathContext, options : Options) => AbstractP
  *	...
  * ```
  */
-export type ModuleHandler = (type : string, getContentData : File['getContentData'], path : AbstractPath, options : Options) => Promise<ModuleExport | null>;
+export type ModuleHandler = (type : string, getContentData : File['getContentData'], path : AbstractPath, options : Options) => Promise<ModuleExport | undefined>;
 
 
 export type ContentData = string | ArrayBuffer
@@ -168,16 +168,16 @@ export type Options = {
  * ```javascript
  *	...
  *	async getFile(url) {
- *	
+ *
  *		const res = await fetch(url);
- *		
+ *
  *		if ( !res.ok )
  *			throw Object.assign(new Error(url+' '+res.statusText), { res });
  *
  *		return {
  *			getContentData: asBinary => asBinary ? res.arrayBuffer() : res.text(),
  *		}
- *		
+ *
  *		return await res.text();
  *	},
  *	...
@@ -208,13 +208,13 @@ export type Options = {
 	addStyle(style : string, scopeId : string | undefined) : void,
 
 /**
- * Sets the delimiters used for text interpolation within the template.  
+ * Sets the delimiters used for text interpolation within the template.
  * Typically this is used to avoid conflicting with server-side frameworks that also use mustache syntax.
  *
  * ```javascript
  * 	...
  * 	<script>
- * 
+ *
  * 		// <!--
  * 		const vueContent = `
  * 			<template> Hello [[[[ who ]]]] !</template>
@@ -229,17 +229,17 @@ export type Options = {
  * 			</script>
  * 		`;
  * 		// -->
- * 
+ *
  * 		const options = {
  * 			moduleCache: { vue: Vue },
  * 			getFile: () => vueContent,
  * 			addStyle: () => {},
  * 			delimiters: ['[[[[', ']]]]'],
  * 		}
- * 
+ *
  * 		const app = Vue.createApp(Vue.defineAsyncComponent(() => window['vue3-sfc-loader'].loadModule('file.vue', options)));
  * 		app.mount(document.body);
- * 
+ *
  * 	</script>
  * 	...
  * ```
@@ -257,12 +257,12 @@ export type Options = {
 
 /**
  * Specifies a check method to recognize native custom elements.
- * 
+ *
  * see. https://vuejs.org/api/application.html#app-config-compileroptions-iscustomelement
  * note: this option has no effect on vue2
  */
 
-	isCustomElement : ((tag: string) => boolean) | undefined,
+	isCustomElement? : ((tag: string) => boolean) | undefined,
 
 
 /**
@@ -307,24 +307,24 @@ export type Options = {
  *	...
  *	compiledCache: {
  *		set(key, str) {
- *	
+ *
  *			// naive storage space management
  *			for (;;) {
- *	
+ *
  *				try {
- *	
+ *
  *					// doc: https://developer.mozilla.org/en-US/docs/Web/API/Storage
  *					window.localStorage.setItem(key, str);
  *					break;
  *				} catch(ex) {
  *					// here we handle DOMException: Failed to execute 'setItem' on 'Storage': Setting the value of 'XXX' exceeded the quota
- *	
+ *
  *					window.localStorage.removeItem(window.localStorage.key(0));
  *				}
  *			}
  *		},
  *		get(key) {
- *	
+ *
  *			return window.localStorage.getItem(key) ?? undefined;
  *		},
  *	},
@@ -343,13 +343,13 @@ export type Options = {
  * ```javascript
  *	...
  *	log(type, ...args) {
- *	
+ *
  *		console.log(type, ...args);
  *	},
  *	...
  * ```
  */
-	log?(type : string, ...data : any[]) : void,
+	log?(type : 'error' | 'warn' | 'info', ...data : any[]) : void,
 
 
 /**
@@ -363,7 +363,7 @@ export type Options = {
  * ```javascript
  *	...
  *	loadModule(path, options) {
- *	
+ *
  *		if ( path === 'vue' )
  *			return Vue;
  *		},
@@ -375,9 +375,9 @@ export type Options = {
 
 /**
  * creates a CommonJS module from JS source string.
- * *(optional)* 
+ * *(optional)*
  */
-	createCJSModule(refPath : AbstractPath, source : string, options : Options) : Module,
+	createCJSModule?(refPath : AbstractPath, source : string, options : Options) : Module,
 
 
 
@@ -385,22 +385,22 @@ export type Options = {
  * Abstact path handling
  * *(optional)*
  */
- 	pathResolve : PathResolve,
+ 	pathResolve? : PathResolve,
 
 /**
  * by default, remove the search string
  * in situation where you need to keep the path intact, use `getPathname: path => path`
  * @param path  a path that may contains extra components like search params or hash (eg. ./mydir/mycomponent.vue?v=123)
  * @returns the pathname component of the path withouy any orher component (eg. ./mydir/mycomponent.vue)
- */	
-	getPathname : (path : string) => string,
+ */
+	getPathname? : (path : string) => string,
 
 /**
  * Abstact resource handling
  * *(optional)*
  *
  */
-	getResource(pathCx : PathContext, options : Options) : Resource,
+	getResource?(pathCx : PathContext, options : Options) : Resource,
 
 
 
@@ -411,12 +411,12 @@ export type Options = {
  * ```javascript
  *	...
  *	customBlockHandler(block, filename, options) {
- *	
+ *
  *		if ( block.type !== 'i18n' )
  *			 return;
- *	
+ *
  *		return (component) => {
- *	
+ *
  *			component.i18n = JSON.parse(block.content);
  *		}
  *	}
@@ -424,22 +424,22 @@ export type Options = {
  * ```
  */
  	customBlockHandler?(block : CustomBlock, filename : AbstractPath, options : Options) : Promise<CustomBlockCallback | undefined>,
-	
-	  
+
+
 /**
  * Set development mode
- * prevent minification, allow debugger statement, 
+ * prevent minification, allow debugger statement,
  */
 	devMode?: boolean,
 
 /**
- * 
- * @param srcRaw 
- * @param lang 
- * @param filename 
+ *
+ * @param srcRaw
+ * @param lang
+ * @param filename
  */
-	processStyles(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : Promise<string>,
-	  
+	processStyles(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : Promise<string> | string,
+
 }
 
 
