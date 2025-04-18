@@ -252,7 +252,9 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 				},
 			);
 
-		compileTemplateOptions.bindings = bindingMetadata;
+		if(bindingMetadata && Object.keys(bindingMetadata).length){
+			compileTemplateOptions.bindings = bindingMetadata;
+		}
 
 		await loadDeps(filename, depsList, options);
 		Object.assign(
@@ -280,8 +282,8 @@ export async function createSFCModule(source : string, filename : AbstractPath, 
 					compileTemplateOptions.compilerOptions.delimiters,
 					compileTemplateOptions.compilerOptions.whitespace,
 					compileTemplateOptions.compilerOptions.scopeId,
-					compileTemplateOptions.compilerOptions.bindings
-						? Object.entries(compileTemplateOptions.compilerOptions.bindings)
+					compileTemplateOptions.bindings
+						? Object.entries(compileTemplateOptions.bindings)
 						: '',
 					additionalBabelParserPlugins,
 					Object.keys(additionalBabelPlugins),
