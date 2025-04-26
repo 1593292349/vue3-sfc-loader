@@ -3,6 +3,7 @@ import {
 } from '@babel/parser';
 
 
+export type MaybePromise<T> = Promise<T> | T;
 /**
  * @internal
  */
@@ -183,7 +184,7 @@ export type Options = {
  *	...
  * ```
 */
-	getFile(path : AbstractPath) : Promise<File | ContentData>,
+	getFile(path : AbstractPath) : MaybePromise<File | ContentData>,
 
 
 /**
@@ -438,9 +439,9 @@ export type Options = {
  * @param lang
  * @param filename
  */
-	processStyles(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : Promise<string> | string,
+	processStyles(srcRaw : string, lang : string | undefined, filename : AbstractPath, options : Options) : MaybePromise<string>,
 
 }
 
 
-export type LangProcessor = (source: string, preprocessOptions?: any) => Promise<string> | string
+export type LangProcessor = (source: string, preprocessOptions?: any) => MaybePromise<string>
